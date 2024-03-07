@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Notification from './Notification';
+import SeachTodo from './SeachTodo';
 
 const TodoInput = () => {
   const [inputValue, setInputValue] = useState('');
@@ -7,6 +8,9 @@ const TodoInput = () => {
 
   const [editIndex, setEditIndex] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [searchInputValue, setSearchInputValue] = useState('');
+  const [filteredTodos, setFilteredTodos] = useState([]);
 
   const [notification, setNotification] = useState('');
 
@@ -61,26 +65,48 @@ const TodoInput = () => {
     }
   };
 
+  // function to serach an todo
+  const searchTodo = () => {
+    if (searchInputValue.length > 0) {
+      const searchedTodos = todos.filter((todo) =>
+        todo.toLowerCase().includes(searchInputValue.toLowerCase())
+      );
+      setFilteredTodos(searchedTodos);
+    } else {
+      setFilteredTodos([...todos]);
+    }
+  };
+
+  useEffect(() => {
+    searchTodo();
+  }, [searchInputValue, todos]);
+
   return (
     <main className='bg-white p-12 rounded-lg w-[90%] md:w-[60%] lg:w-[40%]'>
       {/* Notification component */}
-      <section>
-        <Notification notification={notification} />
-      </section>
+      <Notification notification={notification} />
 
       {/* todo heading */}
-      <p className='text-center font-bold text-2xl  pb-3 border-b border-b-gray-600'>
-        Todo App
-      </p>
+      <section className='flex justify-between items-center border-b pb-4 border-b-gray-600'>
+        <p className='font-bold text-xl'>
+          <i className='fa-solid fa-rectangle-list'></i> Todo App
+        </p>
 
-      <section className='flex items-center gap-4 my-6'>
+        {/* search todo */}
+        <SeachTodo
+          searchInputValue={searchInputValue}
+          setSearchInputValue={setSearchInputValue}
+        />
+      </section>
+
+      <section className='flex items-center gap-4 mt-8'>
         {/* input for adding todo */}
         <input
           type='text'
           placeholder='Add Todo'
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          className='border p-2 rounded-md w-full focus:outline-none focus:border-[rgb(246,_85,_85)]'
+          className='border p-2 rounded-md w-full focus:outline-none focus:border-gray-500'
         />
         <button
           onClick={handleSubmitTodo}
@@ -93,13 +119,16 @@ const TodoInput = () => {
       </section>
 
       {/* todo list */}
-      {todos?.map((todo, index) => (
-        <section
+      {filteredTodos?.map((todo, index) => (
+        <div
           key={index}
-          className='flex justify-between mb-5 mx-1 items-center'
+          className='flex justify-between mx-1 items-center mt-4'
         >
           {/* todo title */}
-          <p className='font-semibold text-lg'>{todo}</p>
+          <p className='font-semibold text-lg'>
+            <i className='fa-solid fa-arrow-up-right-from-square text-sm text-gray-800 pr-1'></i>{' '}
+            {todo}
+          </p>
 
           {/* todo icons */}
           <div>
@@ -112,7 +141,7 @@ const TodoInput = () => {
               className='fa-solid fa-trash cursor-pointer text-gray-600 hover:text-black'
             ></i>
           </div>
-        </section>
+        </div>
       ))}
     </main>
   );
